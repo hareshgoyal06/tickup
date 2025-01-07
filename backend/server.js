@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
-require('dotenv').config();
+const yahooFinance = require('yahoo-finance2').default;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -10,71 +9,110 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const POLYGON_API_KEY = process.env.POLYGON_API_KEY;
-const ALPHA_API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
+/**
+ * ✅ Route 1: Get current stock data
+ * Example: /api/stocks/AAPL
+ */
+app.get('/api/stocks/:symbol', async (req, res) => {
+  try {
+    const { symbol } = req.params;
 
-const filterStockDataByRange = (data, range) => {
-    const now = new Date();
-    const cutoffDate = new Date();
-  
-    switch (range) {
-      case '1y':
-        cutoffDate.setFullYear(now.getFullYear() - 1);
-        break;
-      case '6m':
-        cutoffDate.setMonth(now.getMonth() - 6);
-        break;
-      case '1m':
-        cutoffDate.setMonth(now.getMonth() - 1);
-        break;
-      default:
-        return data; // No filtering if range is not provided
+    // Fetch current stock data
+    const stockData = await yahooFinance.quote(symbol);
+
+    if (!stockData) {
+      return res.status(404).json({ error: 'Stock not found' });
     }
-  
-    return data.filter(item => new Date(item.date) >= cutoffDate);
-  };
 
+    res.json({
+      symbol: stockData.symbol,
+      name: stockData.shortName,
+      currentPrice: stockData.regularMarketPrice,
+      dayHigh: stockData.regularMarketDayHigh,
+      dayLow: stockData.regularMarketDayLow,
+      openPrice: stockData.regularMarketOpen,
+      previousClose: stockData.regularMarketPreviousClose,
+    });
+  } catch (error) {
+    console.error('Error fetching current stock data:', error);
+    res.status(500).json({ error: 'Failed to fetch current stock data' });
+  }
+});
 
-  app.get('/api/stocks/:symbol', async (req, res) => {
-    try {
-      const { symbol } = req.params;
-      const { range } = req.query;
-  
-      // Fetch historical data from Polygon
-      const polygonResponse = await axios.get(
-        `https://api.polygon.io/v2/aggs/ticker/${symbol}/range/1/day/2020-01-01/2025-01-01?apiKey=${POLYGON_API_KEY}`
-      );
-      const stockData = polygonResponse.data.results.map(item => ({
-        date: new Date(item.t).toISOString().split('T')[0], // Convert timestamp to YYYY-MM-DD
-        value: item.c, // Closing price
-      }));
-  
-      // Fetch current price data from Alpha Vantage
-      const alphaResponse = await axios.get(
-        `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_API_KEY}`
-      );
-      const currentPriceData = alphaResponse.data['Global Quote'];
-  
-      if (!currentPriceData) {
-        return res.status(404).json({ error: 'No current price data found for this symbol.' });
-      }
-  
-      const currentPrice = parseFloat(currentPriceData['05. price']);
-  
-      // Filter the historical data based on the selected time range
-      const filteredData = filterStockDataByRange(stockData, range);
-  
-      // Send the combined data as a response
-      res.json({
-        symbol: symbol.toUpperCase(),
-        currentPrice: currentPrice,
-        historicalData: filteredData,
-      });
-    } catch (error) {
-      console.error('Error fetching stock data:', error);
-      res.status(500).json({ error: 'Failed to fetch stock data' });
+/**
+ * ✅ Route 2: Get historical stock data
+ * Example: /api/stocks/AAPL/historical?from=2020-01-01&to=2023-01-01
+ */
+app.get('/api/stocks/:symbol/historical', async (req, res) => {
+  try {
+    const { symbol } = req.params;
+    const { from, to } = req.query;
+
+    // Fetch historical stock data
+    const historicalData = await yahooFinance.historical(symbol, {
+      period1: from || '2020-01-01',
+      period2: to || new Date().toISOString().split('T')[0],
+      interval: '1d',
+    });
+
+    if (!historicalData || historicalData.length === 0) {
+      return res.status(404).json({ error: 'No historical data found' });
     }
-  });
+
+    res.json(historicalData);
+  } catch (error) {
+    console.error('Error fetching historical stock data:', error);
+    res.status(500).json({ error: 'Failed to fetch historical stock data' });
+  }
+});
+
+/**
+ * ✅ Route 3: Search for stocks by symbol
+ * Example: /api/stocks/search?query=apple
+ */
+app.get('/api/stocks/search', async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ error: 'Query parameter is required' });
+    }
+
+    // Fetch search results
+    const searchResults = await yahooFinance.search(query);
+
+    if (!searchResults.quotes || searchResults.quotes.length === 0) {
+      return res.status(404).json({ error: 'No search results found' });
+    }
+
+    res.json(searchResults.quotes);
+  } catch (error) {
+    console.error('Error searching for stocks:', error);
+    res.status(500).json({ error: 'Failed to search for stocks' });
+  }
+});
+
+/**
+ * ✅ Route 4: Get stock recommendations
+ * Example: /api/stocks/AAPL/recommendations
+ */
+app.get('/api/stocks/:symbol/recommendations', async (req, res) => {
+  try {
+    const { symbol } = req.params;
+
+    // Fetch stock recommendations
+    const recommendations = await yahooFinance.recommendationsBySymbol(symbol);
+
+    if (!recommendations || recommendations.length === 0) {
+      return res.status(404).json({ error: 'No recommendations found' });
+    }
+
+    res.json(recommendations);
+  } catch (error) {
+    console.error('Error fetching stock recommendations:', error);
+    res.status(500).json({ error: 'Failed to fetch stock recommendations' });
+  }
+});
 
 // Start the server
 app.listen(PORT, () => {

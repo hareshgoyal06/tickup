@@ -2,7 +2,7 @@
     <nav class="fixed top-0 left-0 h-screen w-24 m-0
       flex flex-col
       bg-gray-900 text-white shadow-lg">
-        <div class="text-white text-2xl font-bold">
+        <div class="text-green-500 text-4xl mt-2 mb-2 font-bold">
             UT
         </div>
         <div>
