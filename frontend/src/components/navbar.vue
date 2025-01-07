@@ -7,19 +7,19 @@
         </div>
         <div>
             <div class="sidebar">
-                <sidebar class="fab fa-facebook"></sidebar>
+                <sidebar class="fa-solid fa-house"></sidebar>
             </div>
             <div class="sidebar">
-                <sidebar class="fab fa-facebook"></sidebar>
+                <sidebar class="fa-solid fa-magnifying-glass"></sidebar>
             </div>
             <div class="sidebar" >
-                <sidebar class="fab fa-facebook"></sidebar>
+                <sidebar class="fa-solid fa-bolt"></sidebar>
             </div>
             <div class="sidebar" >
-                <sidebar class="fab fa-facebook"></sidebar>
+                <sidebar class="fa-solid fa-caret-up"></sidebar>
             </div>
             <div class="sidebar">
-                <sidebar class="fab fa-facebook"></sidebar>
+                <sidebar class="fa-solid fa-user"></sidebar>
             </div>
         </div>
   
