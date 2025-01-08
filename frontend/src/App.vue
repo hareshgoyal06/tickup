@@ -1,13 +1,17 @@
 <template>
-  <div id="app">
+  <div id="app font-inter">
     <!-- Navbar Component -->
     <Navbar />
-
+    <div class>
+      <div class="text-green-500 text-4xl mt-2 mb-2 font-bold">
+        Uptick
+      </div>
+    </div>
     <!-- Real-Time Stock Data Section -->
     <h1>Real-Time Stock Data</h1>
     <input
       v-model="symbol"
-      placeholder="Enter stock symbol (e.g., AAPL)"
+      placeholder="Search for a stock symbol (e.g., AAPL)"
       @keyup.enter="fetchStockData"
     />
     <button @click="fetchStockData">Get Stock Data</button>
