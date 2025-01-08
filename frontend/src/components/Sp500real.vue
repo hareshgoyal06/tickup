@@ -1,14 +1,31 @@
 <template>
   <div class="text-2xl">
     <div class="flex flex-col items-start justify-between aapl-graph-container mx-auto bg-gray-800 text-white p-2 rounded-lg shadow-md">
-      <h2 class="font-bold md-2-mt-2">S&P 500 (^GSPC)</h2>
-      <h2 v-if="stockData" class="mt-4 text-xl">
-       ${{ stockData.current_price.toFixed(2) }}
-      </h2>
+      <!-- Title -->
+      <h2 class="font-bold mb-4 -mt-2">S&P 500 (^GSPC)</h2>
+
+      <!-- Real-Time Stock Price -->
+      <p v-if="currentPrice !== null && dayChange !== null" class="mt-4 text-lg">
+        <strong>{{ symbol }}</strong>: ${{ currentPrice?.toFixed(2) || 'N/A' }} | 
+        <span :class="dayChange > 0 ? 'text-green-500' : 'text-red-500'">
+          ${{ dayChange?.toFixed(2) || '0.00' }} - {{ percentageChange?.toFixed(2) || '0.00' }}%
+        </span>
+      </p>
+
+      <!-- Line Chart -->
       <LineChart :data="chartData" :options="chartOptions" />
     </div>
   </div>
+  <div class="justify-center flex space-x-2 my-4">
+        <button v-for="range in timeRanges" :key="range.value" @click="updatePeriod(range.value)"
+          :class="{'bg-green-500 text-white': selectedPeriod === range.value, 'bg-gray-600 text-white': selectedPeriod !== range.value}"
+          class="px-4 py-2 rounded hover:bg-green-600 focus:outline-none"
+        >
+          {{ range.label }}
+        </button>
+  </div>
 </template>
+
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
@@ -16,6 +33,7 @@ import { getHistoricalStockData } from '../services/api';
 import { getStockData } from '../services/api';
 import LineChart from '../components/LineChart.vue';
 import type { ChartData, ChartOptions } from 'chart.js';
+import { getOpenPrice } from '../services/api';
 
 export default defineComponent({
   name: 'AAPLGraph',
@@ -28,7 +46,27 @@ export default defineComponent({
     const historicalData = ref<any[]>([]);
     const selectedPeriod = ref<string>('6mo');
     const error = ref<string | null>(null);
+    const currentPrice = ref<number | null>(null);
+    const openingPrice = ref<number | null>(null);
+    const dayChange = ref<number | null>(null);
+    const percentageChange = ref<number | null>(null);
     const loading = ref<boolean>(false);
+
+// Time range buttons
+    const timeRanges = ref([
+      { label: '5d', value: '5d' },
+      { label: '1M', value: '1mo' },
+      { label: '6M', value: '6mo' },
+      { label: '1Y', value: '1y' },
+      { label: '5Y', value: '5y' },
+    ]);
+
+
+    interface stockData {
+      symbol: string;
+      current_price: number;
+    }
+
     // Reactive state for chart data and options
     const chartData = ref<ChartData<'line'>>({
       labels: [],
@@ -45,20 +83,35 @@ export default defineComponent({
       ],
     });
 
+    const updatePeriod = async (period: string) => {
+      selectedPeriod.value = period;
+      await fetchHistoricalData();
+    };
+
     const fetchStockData = async () => {
       try {
         error.value = null;
-        stockData.value = null;
         loading.value = true;
 
-        stockData.value = await getStockData(symbol.value);
-      } catch (err) {
-        error.value = 'Failed to fetch stock data. Please try again.';
-        console.error(err);
-      } finally {
-        loading.value = false;
+        const stockData = await getStockData(symbol.value);
+      currentPrice.value = stockData.current_price;
+
+      // Fetch the opening price
+      const openPriceData = await getOpenPrice(symbol.value);
+      openingPrice.value = openPriceData.opening_price;
+
+      // Calculate the day change and percentage change
+      if (currentPrice.value !== null && openingPrice.value !== null) {
+        dayChange.value = currentPrice.value - openingPrice.value;
+        percentageChange.value = (dayChange.value / openingPrice.value) * 100;
       }
-    };
+        } catch (err) {
+          error.value = 'Failed to fetch stock data. Please try again.';
+          console.error(err);
+        } finally {
+          loading.value = false;
+        }
+      };
 
     const chartOptions = ref<ChartOptions<'line'>>({
       responsive: true,
@@ -147,8 +200,16 @@ export default defineComponent({
 
     return {
       stockData,
+      symbol,
+      currentPrice,
+      openingPrice,
+      dayChange,
+      percentageChange,
       chartData,
       chartOptions,
+      timeRanges,
+      selectedPeriod,
+      updatePeriod,
     };
   },
 });
@@ -156,7 +217,7 @@ export default defineComponent({
 
 <style scoped>
 .aapl-graph-container {
-  width: 55%;
+  width: 45%;
   background-color: #1F2937;
   height: 500px;
   margin: 20px auto;

@@ -10,6 +10,8 @@
           An All-in-one <span class="text-green-500">Solution</span> to Tracking Solutions
         </div>
         <APPLGraph />
+        <randomGraph symbol="^GSPC" title="S&P 500 (^GSPC)" />
+        <randomGraph symbol="AAPL" title="Apple Inc. (AAPL)" />
       </div>
     </div>
   </template>
@@ -21,6 +23,7 @@
   import LineChart from '../components/LineChart.vue';
   import type { ChartOptions } from 'chart.js';
   import APPLGraph from '../components/Sp500real.vue';
+  import randomGraph from '../components/SP500.vue';
   
   
   export default defineComponent({
@@ -29,6 +32,7 @@
       Navbar,
       LineChart,
       APPLGraph,
+      randomGraph,
     },
     setup() {
       // Reactive state

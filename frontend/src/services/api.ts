@@ -11,6 +11,16 @@ export const getStockData = async (symbol: string) => {
   }
 };
 
+export const getOpenPrice = async (symbol: string) => {
+  try {
+    const response = await axios.get(`/api/stocks/${symbol}/opening`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching stock data:', error);
+    throw error;
+  }
+};
+
 export const getHistoricalStockData = async (symbol: string, period: string) => {
   try {
     const response = await axios.get(`/api/stocks/${symbol}/historical`, {

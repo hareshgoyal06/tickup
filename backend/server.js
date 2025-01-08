@@ -23,6 +23,19 @@ app.get('/api/stocks/:symbol', async (req, res) => {
   }
 });
 
+app.get('/api/stocks/:symbol/opening', async (req, res) => {
+  try {
+    const { symbol } = req.params;
+
+    // Make a request to the FastAPI service
+    const response = await axios.get(`http://localhost:8000/stock/${symbol}/opening`);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching stock data:', error);
+    res.status(500).json({ error: 'Failed to fetch stock data' });
+  }
+});
+
 // ✅ Route: Fetch historical stock data with time range options
 app.get('/api/stocks/:symbol/historical', async (req, res) => {
   try {

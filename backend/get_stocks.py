@@ -3,7 +3,6 @@ import yfinance as yf
 
 app = FastAPI()
 
-# ✅ Route to get real-time stock price
 @app.get("/stock/{symbol}")
 async def get_stock_price(symbol: str):
     try:
@@ -50,6 +49,25 @@ async def get_stock_info(symbol: str):
             "sector": info.get("sector", "N/A"),
             "industry": info.get("industry", "N/A"),
             "website": info.get("website", "N/A"),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/stock/{symbol}/opening")
+async def get_opening_price(symbol: str):
+    try:
+        stock = yf.Ticker(symbol)
+        data = stock.history(period="1d")
+
+        if data.empty:
+            raise HTTPException(status_code=404, detail="Stock symbol not found")
+
+        # Extract today's opening price
+        opening_price = data["Open"].iloc[-1]
+
+        return {
+            "symbol": symbol.upper(),
+            "opening_price": opening_price,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
