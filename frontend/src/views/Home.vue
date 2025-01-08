@@ -7,8 +7,9 @@
           Uptick
         </div>
         <div class="text-white p-4 text-2xl">
-          Revolutionize your stock trading experience with Uptick
+          An All-in-one <span class="text-green-500">Solution</span> to Tracking Solutions
         </div>
+        <APPLGraph />
       </div>
     </div>
   </template>
@@ -19,6 +20,7 @@
   import Navbar from '../components/navbar.vue';
   import LineChart from '../components/LineChart.vue';
   import type { ChartOptions } from 'chart.js';
+  import APPLGraph from '../components/Sp500real.vue';
   
   
   export default defineComponent({
@@ -26,6 +28,7 @@
     components: {
       Navbar,
       LineChart,
+      APPLGraph,
     },
     setup() {
       // Reactive state
