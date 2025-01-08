@@ -1,52 +1,50 @@
 <template>
-    <div>
-      <line-chart :data="data" :options="options"></line-chart>
-    </div>
-  </template>
-  
-  <script lang="ts">
-  import { defineComponent } from 'vue';
-  import type { PropType } from 'vue';
-  import { Line } from 'vue-chartjs';
-  import {
-    Chart as ChartJS,
-    Title,
-    Tooltip,
-    Legend,
-    LineElement,
-    PointElement,
-    CategoryScale,
-    LinearScale,
-    ChartData,
-    ChartOptions,
-  } from 'chart.js';
-  
-  // Register required components from Chart.js
-  ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
-  
-  export default defineComponent({
-    name: 'LineChart',
-    components: {
-      LineChart: Line,
+  <div class="chart-container">
+    <Line :data="data" :options="options" />
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent, type PropType } from 'vue';
+import { Line } from 'vue-chartjs';
+import type { ChartData, ChartOptions } from 'chart.js';
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
+
+export default defineComponent({
+  name: 'LineChart',
+  components: {
+    Line,
+  },
+  props: {
+    data: {
+      type: Object as PropType<ChartData<'line'>>,
+      required: true,
     },
-    props: {
-      data: {
-        type: Object as PropType<ChartData<'line'>>,
-        required: true,
-      },
-      options: {
-        type: Object as PropType<ChartOptions<'line'>>,
-        required: false,
-      },
+    options: {
+      type: Object as PropType<ChartOptions<'line'>>,
+      required: false,
     },
-  });
-  </script>
-  
-  <style scoped>
-  .chart-container {
-    position: relative;
-    width: 80%;
-    margin: 0 auto;
-  }
-  </style>
-  
+  },
+});
+</script>
+
+<style scoped>
+.chart-container {
+  position: relative;
+  width: 100%; /* ✅ Expand to fill the container */
+  height: 400px; /* ✅ Increase the height of the chart */
+  margin: 20px auto;
+}
+</style>

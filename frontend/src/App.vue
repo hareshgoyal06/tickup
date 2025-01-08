@@ -34,14 +34,11 @@
       <option value="2y">2 Years</option>
     </select>
 
+    
     <!-- Display historical stock data -->
-    <div v-if="historicalData.length > 0 && !loading">
-      <h2>Historical Data for {{ stockData.symbol }}</h2>
-      <ul>
-        <li v-for="data in historicalData" :key="data.date">
-          {{ data.date }}: ${{ data.value.toFixed(2) }}
-        </li>
-      </ul>
+    <div v-if="chartData">
+      <h2>Historical Data Chart for {{ symbol.toUpperCase() }}</h2>
+      <LineChart :data="chartData" :options="chartOptions" />
     </div>
   </div>
 </template>
@@ -50,11 +47,15 @@
 import { defineComponent, ref } from 'vue';
 import { getStockData, getHistoricalStockData } from './services/api';
 import Navbar from './components/navbar.vue';
+import LineChart from './components/LineChart.vue';
+import type { ChartOptions } from 'chart.js';
+
 
 export default defineComponent({
   name: 'App',
   components: {
     Navbar,
+    LineChart,
   },
   setup() {
     // Reactive state
@@ -64,6 +65,7 @@ export default defineComponent({
     const selectedPeriod = ref<string>('6mo');
     const error = ref<string | null>(null);
     const loading = ref<boolean>(false);
+    const chartData = ref<any>(null);
 
     // Function to fetch real-time stock data
     const fetchStockData = async () => {
@@ -80,6 +82,51 @@ export default defineComponent({
         loading.value = false;
       }
     };
+    const chartOptions = ref<ChartOptions<'line'>>({
+      responsive: true,
+      maintainAspectRatio: false, 
+      plugins: {
+        legend: {
+          display: false, 
+        },
+        title: {
+          display: true,
+          text: 'Historical Stock Prices',
+          color: '#1f2937', // Gray-800
+          font: {
+            size: 20,
+            weight: 'bold',
+          },
+        },
+      },
+      scales: {
+        x: {
+          display: false,
+          grid: {
+            display: false, // ✅ Remove vertical grid lines
+          },
+          ticks: {
+            color: '#374151', // Gray-700
+            font: {
+              size: 12,
+            },
+          },
+        },
+        y: {
+          grid: {
+            color: '#d1d5db', // Light gray
+          },
+          ticks: {
+            color: '#374151', // Gray-700
+            font: {
+              size: 12,
+            },
+          },
+        },
+      },
+    });
+
+
 
     // Function to fetch historical stock data
     const fetchHistoricalData = async () => {
@@ -88,7 +135,26 @@ export default defineComponent({
         historicalData.value = [];
         loading.value = true;
 
-        historicalData.value = await getHistoricalStockData(symbol.value, selectedPeriod.value);
+        // Fetch historical data from the backend
+        const response = await getHistoricalStockData(symbol.value, selectedPeriod.value);
+
+        // Transform the data for Chart.js
+        chartData.value = {
+          labels: response.historical_data.map((item: { Date: string | number | Date; }) => new Date(item.Date).toISOString().split('T')[0]),
+          datasets: [
+            {
+              label: `Closing Prices for ${symbol.value.toUpperCase()}`,
+              data: response.historical_data.map((item: { Close: any; }) => item.Close),
+              borderColor: 'rgba(34, 197, 94, 1)', // ✅ Green-500 color
+              backgroundColor: 'rgba(34, 197, 94, 0.2)', // ✅ Green-500 with transparency
+              pointBackgroundColor: 'rgba(34, 197, 94, 1)',
+              pointBorderColor: 'rgba(34, 197, 94, 1)',
+              tension: 0.4, 
+              borderWidth: 2, 
+              pointRadius: 0.2
+            },
+          ],
+        };
       } catch (err) {
         error.value = 'Failed to fetch historical stock data. Please try again.';
         console.error(err);
@@ -97,10 +163,13 @@ export default defineComponent({
       }
     };
 
+
     return {
       symbol,
       stockData,
       historicalData,
+      chartData,
+      chartOptions,
       selectedPeriod,
       error,
       loading,

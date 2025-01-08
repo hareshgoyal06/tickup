@@ -13,9 +13,10 @@ export const getStockData = async (symbol: string) => {
 
 export const getHistoricalStockData = async (symbol: string, period: string) => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/stocks/${symbol}/historical`, {
+    const response = await axios.get(`/api/stocks/${symbol}/historical`, {
       params: { period },
     });
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching historical stock data:', error);
