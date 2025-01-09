@@ -10,8 +10,6 @@
           An All-in-one <span class="text-green-500">Solution</span> to Tracking Solutions
         </div>
         <APPLGraph />
-        <randomGraph symbol="^GSPC" title="S&P 500 (^GSPC)" />
-        <randomGraph symbol="AAPL" title="Apple Inc. (AAPL)" />
       </div>
     </div>
   </template>

@@ -170,7 +170,8 @@ export default defineComponent({
 
 <style scoped>
 .stock-graph-container {
-  width: 55%;
+  width: 100%;
+  height:110%;
   background-color: #1F2937;
   height: 500px;
   margin: 20px auto;

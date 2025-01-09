@@ -36,7 +36,6 @@ app.get('/api/stocks/:symbol/opening', async (req, res) => {
   }
 });
 
-// ✅ Route: Fetch historical stock data with time range options
 app.get('/api/stocks/:symbol/historical', async (req, res) => {
   try {
     const { symbol } = req.params;
