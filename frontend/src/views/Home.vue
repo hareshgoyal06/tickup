@@ -10,6 +10,7 @@
           An All-in-one <span class="text-green-500">Solution</span> to Tracking Solutions
         </div>
         <APPLGraph />
+        <News />
       </div>
     </div>
   </template>
@@ -22,6 +23,7 @@
   import type { ChartOptions } from 'chart.js';
   import APPLGraph from '../components/Sp500real.vue';
   import randomGraph from '../components/SP500.vue';
+  import News from '../components/News.vue';
   
   
   export default defineComponent({
@@ -31,6 +33,7 @@
       LineChart,
       APPLGraph,
       randomGraph,
+      News,
     },
     setup() {
       // Reactive state

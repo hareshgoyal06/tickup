@@ -3,13 +3,11 @@
     <!-- Navbar Component -->
     <Navbar />
 
-    <!-- Main Header Section -->
     <div class="text-center p-8">
       <h1 class="text-green-500 text-5xl font-bold">Uptick</h1>
-      <p class="text-2xl mt-2">Discover <span class="text-green-500">Trending</span> Stocks</p>
+      <p class="text-2xl mt-2">Search <span class="text-green-500">Your</span> Stocks</p>
     </div>
 
-    <!-- Search Section -->
     <div class="flex flex-col items-center mb-8">
       <h2 class="text-2xl font-bold mb-4">Search for a Stock</h2>
       <div class="flex">

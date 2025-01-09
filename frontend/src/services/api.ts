@@ -33,3 +33,23 @@ export const getHistoricalStockData = async (symbol: string, period: string) => 
     throw error;
   }
 };
+
+export const getNews = async (symbol: string) => {
+  try {
+    const response = await axios.get(`/api/stocks/${symbol}/news`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching stock data:', error);
+    throw error;
+  }
+};
+
+export const getSentiment = async (symbol: string) => {
+  try {
+    const response = await axios.get(`/api/stocks/${symbol}/sentiment`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching sentiment data:', error);
+    throw error;
+  }
+};
